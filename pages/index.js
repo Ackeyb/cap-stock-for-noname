@@ -20,7 +20,7 @@ export default function Home() {
   const [isCopied, setIsCopied] = useState(false);
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const [tempData, setTempData] = useState({});
-　const [isExtraFieldsVisible, setIsExtraFieldsVisible] = useState(false);
+  const [isExtraFieldsVisible, setIsExtraFieldsVisible] = useState(false);
   const [previousData, setPreviousData] = useState({});
   const [baseDataForDiff, setBaseDataForDiff] = useState({});
 
@@ -38,6 +38,7 @@ export default function Home() {
         docs = docs.slice(0, 20);
       }
       setDocList(docs);
+      console.log("docList:", docs);
     };
     fetchDocs();
   }, []);
@@ -239,7 +240,7 @@ const fetchSelectedDoc = async () => {
           marginBottom: "15px" , 
   　　　　marginTop: "20px" 
         }}>
-          Cap Management for ReRyss
+          Cap Management for NONAME
         </h1>
       </div>
 
