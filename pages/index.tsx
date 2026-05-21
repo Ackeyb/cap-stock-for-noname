@@ -20,6 +20,8 @@ import {
 import { fetchCapstockDoc, fetchRecentCapstockDocIds, saveCapstockDoc } from "../lib/capstockService";
 import { useCapstockState } from "../hooks/useCapstockState";
 
+const LOAD_ERROR_MESSAGE = "データ一覧の取得に失敗しました。Firebase の環境変数を確認してください。";
+
 export default function Home() {
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const { state, dispatch } = useCapstockState();
@@ -49,7 +51,11 @@ export default function Home() {
     document.body.style.color = "#ffffff";
 
     const fetchDocs = async () => {
-      dispatch({ type: "setDocList", docList: await fetchRecentCapstockDocIds() });
+      try {
+        dispatch({ type: "setDocList", docList: await fetchRecentCapstockDocIds() });
+      } catch {
+        dispatch({ type: "setError", errorMessage: LOAD_ERROR_MESSAGE });
+      }
     };
 
     fetchDocs();
@@ -179,9 +185,7 @@ export default function Home() {
         operation={operation}
         isDisplayed={isDisplayed}
         onSelectField={(fieldName) => dispatch({ type: "selectField", selectedField: fieldName })}
-        onUpdateValue={(index, value) => {
-          dispatch({ type: "setUpdateValue", index, value });
-        }}
+        onUpdateValue={(index, value) => dispatch({ type: "setUpdateValue", index, value })}
         onSetOperation={(nextOperation) => dispatch({ type: "setOperation", operation: nextOperation })}
         onApply={handleUpdateFieldMultiple}
       />

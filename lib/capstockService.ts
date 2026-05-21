@@ -1,11 +1,12 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { getDb } from "./firebase";
 import type { FirestoreCapstockData } from "./capstockTypes";
 
 const COLLECTION_NAME = "capstock";
 const MAX_DOCS = 20;
 
 export async function fetchRecentCapstockDocIds(): Promise<string[]> {
+  const db = getDb();
   const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
   let docIds = querySnapshot.docs.map((snapshot) => snapshot.id).sort().reverse();
 
@@ -20,6 +21,7 @@ export async function fetchRecentCapstockDocIds(): Promise<string[]> {
 }
 
 export async function fetchCapstockDoc(docId: string): Promise<FirestoreCapstockData | null> {
+  const db = getDb();
   const docRef = doc(db, COLLECTION_NAME, docId);
   const docSnap = await getDoc(docRef);
 
@@ -31,6 +33,7 @@ export async function fetchCapstockDoc(docId: string): Promise<FirestoreCapstock
 }
 
 export async function saveCapstockDoc(docId: string, data: FirestoreCapstockData) {
+  const db = getDb();
   const docRef = doc(db, COLLECTION_NAME, docId);
   await setDoc(docRef, data);
 }

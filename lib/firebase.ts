@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp, type FirebaseApp } from "firebase/app";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -19,12 +19,27 @@ const requiredFirebaseEnv = [
   "NEXT_PUBLIC_FIREBASE_APP_ID",
 ] as const;
 
-const missingFirebaseEnv = requiredFirebaseEnv.filter((key) => !process.env[key]);
+let app: FirebaseApp | null = null;
+let firestore: Firestore | null = null;
 
-if (missingFirebaseEnv.length > 0 && typeof window !== "undefined") {
-  throw new Error(`Firebase environment variables are missing: ${missingFirebaseEnv.join(", ")}`);
+export function getMissingFirebaseEnv() {
+  return requiredFirebaseEnv.filter((key) => !process.env[key]);
 }
 
-const app = initializeApp(firebaseConfig);
+export function getDb() {
+  const missingFirebaseEnv = getMissingFirebaseEnv();
 
-export const db = getFirestore(app);
+  if (missingFirebaseEnv.length > 0) {
+    throw new Error(`Firebase environment variables are missing: ${missingFirebaseEnv.join(", ")}`);
+  }
+
+  if (!app) {
+    app = initializeApp(firebaseConfig);
+  }
+
+  if (!firestore) {
+    firestore = getFirestore(app);
+  }
+
+  return firestore;
+}
