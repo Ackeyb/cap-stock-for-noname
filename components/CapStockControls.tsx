@@ -1,3 +1,53 @@
+import type { Operation } from "../lib/capstockTypes";
+
+type DocSelectorProps = {
+  docList: string[];
+  selectedDoc: string;
+  onSelectDoc: (docName: string) => void;
+  onFetchSelectedDoc: () => void;
+};
+
+type FieldEditorProps = {
+  fieldList: string[];
+  selectedField: string;
+  updateValues: string[];
+  operation: Operation;
+  isDisplayed: boolean;
+  onSelectField: (fieldName: string) => void;
+  onUpdateValue: (index: number, value: string) => void;
+  onSetOperation: (operation: Operation) => void;
+  onApply: () => void;
+};
+
+type ExtraFieldsPanelProps = {
+  fieldList: string[];
+  isDisplayed: boolean;
+  isVisible: boolean;
+  newFieldName: string;
+  newFieldValue: string;
+  selectedFieldToDelete: string;
+  onToggle: () => void;
+  onSetNewFieldName: (fieldName: string) => void;
+  onSetNewFieldValue: (fieldValue: string) => void;
+  onSelectFieldToDelete: (fieldName: string) => void;
+  onAddField: () => void;
+  onDeleteField: () => void;
+};
+
+type PreviewPanelsProps = {
+  previewText: string;
+  previewHistory: string;
+  isMobile: boolean;
+};
+
+type SaveCopyActionsProps = {
+  isDisplayed: boolean;
+  isSaved: boolean;
+  isCopied: boolean;
+  onSaveData: () => void;
+  onCopyToClipboard: () => void;
+};
+
 export function PageTitle() {
   return (
     <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
@@ -19,7 +69,7 @@ export function PageTitle() {
   );
 }
 
-export function DocSelector({ docList, selectedDoc, onSelectDoc, onFetchSelectedDoc }) {
+export function DocSelector({ docList, selectedDoc, onSelectDoc, onFetchSelectedDoc }: DocSelectorProps) {
   return (
     <>
       <div style={{ marginBottom: "5px" }}>
@@ -54,7 +104,17 @@ export function DocSelector({ docList, selectedDoc, onSelectDoc, onFetchSelected
   );
 }
 
-export function FieldEditor({ fieldList, selectedField, updateValues, operation, isDisplayed, onSelectField, onUpdateValue, onSetOperation, onApply }) {
+export function FieldEditor({
+  fieldList,
+  selectedField,
+  updateValues,
+  operation,
+  isDisplayed,
+  onSelectField,
+  onUpdateValue,
+  onSetOperation,
+  onApply,
+}: FieldEditorProps) {
   return (
     <>
       <div style={{ marginBottom: "15px" }}>
@@ -126,7 +186,7 @@ export function ExtraFieldsPanel({
   onSelectFieldToDelete,
   onAddField,
   onDeleteField,
-}) {
+}: ExtraFieldsPanelProps) {
   return (
     <>
       <button
@@ -202,7 +262,7 @@ export function ExtraFieldsPanel({
   );
 }
 
-export function PreviewPanels({ previewText, previewHistory, isMobile }) {
+export function PreviewPanels({ previewText, previewHistory, isMobile }: PreviewPanelsProps) {
   return (
     <div style={{ display: "flex", gap: "5px", justifyContent: "center", marginBottom: "15px" }}>
       <div style={{ width: "40%" }}>
@@ -217,7 +277,7 @@ export function PreviewPanels({ previewText, previewHistory, isMobile }) {
   );
 }
 
-export function SaveCopyActions({ isDisplayed, isSaved, isCopied, onSaveData, onCopyToClipboard }) {
+export function SaveCopyActions({ isDisplayed, isSaved, isCopied, onSaveData, onCopyToClipboard }: SaveCopyActionsProps) {
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>

@@ -1,17 +1,24 @@
+import type { CapstockData, FirestoreCapstockData, Operation } from "./capstockTypes";
+
 export const INITIAL_UPDATE_VALUES = ["", "", "", "", ""];
 export const MINUS_FIELD_NAME = "マイナス";
 
-export function getOrderedVisibleData(data) {
+export function getOrderedVisibleData(data: FirestoreCapstockData) {
   const orderedKeys = data._order || Object.keys(data);
   const visibleKeys = orderedKeys.filter((key) => key !== "_order");
 
   return {
     fieldList: visibleKeys,
-    values: Object.fromEntries(visibleKeys.map((key) => [key, data[key]])),
+    values: Object.fromEntries(
+      visibleKeys.map((key) => {
+        const value = data[key];
+        return [key, typeof value === "number" ? value : 0];
+      })
+    ) as CapstockData,
   };
 }
 
-export function formatPreview(data, baseData = {}) {
+export function formatPreview(data: CapstockData, baseData: CapstockData = {}) {
   return Object.entries(data)
     .map(([key, value]) => {
       const baseValue = baseData[key] ?? value;
@@ -22,13 +29,13 @@ export function formatPreview(data, baseData = {}) {
     .join("\n");
 }
 
-export function formatPlainPreview(data) {
+export function formatPlainPreview(data: CapstockData) {
   return Object.entries(data)
     .map(([key, value]) => `${key}: ${value}`)
     .join("\n");
 }
 
-export function appendHistory(currentHistory, entries) {
+export function appendHistory(currentHistory: string, entries: string | string[]) {
   const nextEntries = Array.isArray(entries) ? entries : [entries];
   const nextHistory = nextEntries.filter(Boolean).join("\n");
 
@@ -36,9 +43,16 @@ export function appendHistory(currentHistory, entries) {
   return currentHistory + (currentHistory ? "\n" : "") + nextHistory;
 }
 
-export function applyFieldUpdates({ data, selectedField, updateValues, operation }) {
+type ApplyFieldUpdatesInput = {
+  data: CapstockData;
+  selectedField: string;
+  updateValues: string[];
+  operation: Operation;
+};
+
+export function applyFieldUpdates({ data, selectedField, updateValues, operation }: ApplyFieldUpdatesInput) {
   const updatedData = { ...data };
-  const historyEntries = [];
+  const historyEntries: string[] = [];
 
   updateValues.forEach((value) => {
     if (value === "") return;
@@ -62,7 +76,7 @@ export function applyFieldUpdates({ data, selectedField, updateValues, operation
   return { data: updatedData, historyEntries };
 }
 
-export function addFieldValue(data, fieldName, fieldValue) {
+export function addFieldValue(data: CapstockData, fieldName: string, fieldValue: string) {
   const numericValue = Number(fieldValue);
 
   return {
@@ -71,7 +85,7 @@ export function addFieldValue(data, fieldName, fieldValue) {
   };
 }
 
-export function deleteFieldValue(data, fieldName) {
+export function deleteFieldValue(data: CapstockData, fieldName: string) {
   const oldValue = data[fieldName];
   const updatedData = { ...data };
   delete updatedData[fieldName];
@@ -82,7 +96,7 @@ export function deleteFieldValue(data, fieldName) {
   };
 }
 
-export function buildSaveData(data) {
+export function buildSaveData(data: CapstockData): FirestoreCapstockData {
   return {
     ...data,
     _order: Object.keys(data).filter((key) => key !== "_order"),
