@@ -1,29 +1,26 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-
-const requiredFirebaseEnv = [
-  "NEXT_PUBLIC_FIREBASE_API_KEY",
-  "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
-  "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
-  "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
-  "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
-  "NEXT_PUBLIC_FIREBASE_APP_ID",
-] as const;
+const envPairs = {
+  apiKey: ["NEXT_PUBLIC_FIREBASE_API_KEY", "FIREBASE_API_KEY"],
+  authDomain: ["NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN", "FIREBASE_AUTH_DOMAIN"],
+  projectId: ["NEXT_PUBLIC_FIREBASE_PROJECT_ID", "FIREBASE_PROJECT_ID"],
+  storageBucket: ["NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET", "FIREBASE_STORAGE_BUCKET"],
+  messagingSenderId: ["NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID", "FIREBASE_MESSAGING_SENDER_ID"],
+  appId: ["NEXT_PUBLIC_FIREBASE_APP_ID", "FIREBASE_APP_ID"],
+} as const;
 
 let app: FirebaseApp | null = null;
 let firestore: Firestore | null = null;
 
+function readEnv([publicKey, serverKey]: readonly [string, string]) {
+  return process.env[publicKey] || process.env[serverKey];
+}
+
 export function getMissingFirebaseEnv() {
-  return requiredFirebaseEnv.filter((key) => !process.env[key]);
+  return Object.values(envPairs)
+    .filter((keys) => !readEnv(keys))
+    .map((keys) => keys.join(" or "));
 }
 
 export function getDb() {
@@ -34,7 +31,14 @@ export function getDb() {
   }
 
   if (!app) {
-    app = initializeApp(firebaseConfig);
+    app = initializeApp({
+      apiKey: readEnv(envPairs.apiKey),
+      authDomain: readEnv(envPairs.authDomain),
+      projectId: readEnv(envPairs.projectId),
+      storageBucket: readEnv(envPairs.storageBucket),
+      messagingSenderId: readEnv(envPairs.messagingSenderId),
+      appId: readEnv(envPairs.appId),
+    });
   }
 
   if (!firestore) {

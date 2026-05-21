@@ -1,39 +1,31 @@
-import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
-import { getDb } from "./firebase";
 import type { FirestoreCapstockData } from "./capstockTypes";
 
-const COLLECTION_NAME = "capstock";
-const MAX_DOCS = 20;
+async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, init);
 
-export async function fetchRecentCapstockDocIds(): Promise<string[]> {
-  const db = getDb();
-  const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-  let docIds = querySnapshot.docs.map((snapshot) => snapshot.id).sort().reverse();
-
-  if (docIds.length > MAX_DOCS) {
-    for (let i = MAX_DOCS; i < docIds.length; i++) {
-      await deleteDoc(doc(db, COLLECTION_NAME, docIds[i]));
-    }
-    docIds = docIds.slice(0, MAX_DOCS);
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
   }
 
-  return docIds;
+  return response.json() as Promise<T>;
+}
+
+export async function fetchRecentCapstockDocIds(): Promise<string[]> {
+  const data = await requestJson<{ docIds: string[] }>("/api/capstock");
+  return data.docIds;
 }
 
 export async function fetchCapstockDoc(docId: string): Promise<FirestoreCapstockData | null> {
-  const db = getDb();
-  const docRef = doc(db, COLLECTION_NAME, docId);
-  const docSnap = await getDoc(docRef);
-
-  if (!docSnap.exists()) {
-    return null;
-  }
-
-  return docSnap.data() as FirestoreCapstockData;
+  const data = await requestJson<{ doc: FirestoreCapstockData | null }>(`/api/capstock/${encodeURIComponent(docId)}`);
+  return data.doc;
 }
 
 export async function saveCapstockDoc(docId: string, data: FirestoreCapstockData) {
-  const db = getDb();
-  const docRef = doc(db, COLLECTION_NAME, docId);
-  await setDoc(docRef, data);
+  await requestJson<{ ok: true }>("/api/capstock", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ docId, data }),
+  });
 }
