@@ -1,0 +1,158 @@
+.titleWrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.title {
+  color: red;
+  border-bottom: 2px solid red;
+  padding-bottom: 5px;
+  font-size: 1.5rem;
+  white-space: nowrap;
+  text-align: center;
+  margin: 20px 0 15px;
+}
+
+.row {
+  margin-bottom: 15px;
+}
+
+.compactRow {
+  margin-bottom: 5px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.docSelect {
+  width: 60%;
+}
+
+.fieldSelect {
+  width: 40%;
+}
+
+.inlineButton {
+  margin-left: 10px;
+  width: 20%;
+}
+
+.applyButton {
+  margin-left: 10px;
+  width: 12%;
+}
+
+.hint {
+  height: 16px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: #aaa;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.hintHidden {
+  opacity: 0;
+}
+
+.hintVisible {
+  opacity: 1;
+}
+
+.numberInput {
+  margin-left: 10px;
+  width: 9%;
+}
+
+.radioInput {
+  margin-left: 10px;
+}
+
+.toggleButton {
+  margin-bottom: 10px;
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.extraPanel {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.fieldGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.textInput {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.smallInput {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.panelButton {
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.previewLayout {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.previewColumn {
+  width: 40%;
+}
+
+.historyColumn {
+  width: 56%;
+}
+
+.textarea {
+  width: 100%;
+  margin-top: 5px;
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.copyRow {
+  display: flex;
+  align-items: center;
+}
+
+.primaryAction {
+  width: 40%;
+}
+
+.successText {
+  margin-left: 10px;
+  color: limegreen;
+}

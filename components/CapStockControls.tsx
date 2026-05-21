@@ -1,4 +1,5 @@
 import type { Operation } from "../lib/capstockTypes";
+import styles from "./CapStockControls.module.css";
 
 type DocSelectorProps = {
   docList: string[];
@@ -50,21 +51,8 @@ type SaveCopyActionsProps = {
 
 export function PageTitle() {
   return (
-    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-      <h1
-        style={{
-          color: "red",
-          borderBottom: "2px solid red",
-          paddingBottom: "5px",
-          fontSize: "1.5rem",
-          whiteSpace: "nowrap",
-          textAlign: "center",
-          marginBottom: "15px",
-          marginTop: "20px",
-        }}
-      >
-        Cap Management for HANA
-      </h1>
+    <div className={styles.titleWrap}>
+      <h1 className={styles.title}>Cap Management for HANA</h1>
     </div>
   );
 }
@@ -72,9 +60,9 @@ export function PageTitle() {
 export function DocSelector({ docList, selectedDoc, onSelectDoc, onFetchSelectedDoc }: DocSelectorProps) {
   return (
     <>
-      <div style={{ marginBottom: "5px" }}>
-        <label style={{ display: "block", marginBottom: "5px" }}>データを選択</label>
-        <select onChange={(event) => onSelectDoc(event.target.value)} value={selectedDoc} style={{ width: "60%" }}>
+      <div className={styles.compactRow}>
+        <label className={styles.label}>データを選択</label>
+        <select onChange={(event) => onSelectDoc(event.target.value)} value={selectedDoc} className={styles.docSelect}>
           <option value="">-- データを選択してください --</option>
           {docList.map((docName) => (
             <option key={docName} value={docName}>
@@ -82,22 +70,12 @@ export function DocSelector({ docList, selectedDoc, onSelectDoc, onFetchSelected
             </option>
           ))}
         </select>
-        <button onClick={onFetchSelectedDoc} disabled={!selectedDoc} style={{ marginLeft: "10px", width: "20%" }}>
+        <button onClick={onFetchSelectedDoc} disabled={!selectedDoc} className={styles.inlineButton}>
           表示する
         </button>
       </div>
 
-      <div
-        style={{
-          height: "16px",
-          marginBottom: "8px",
-          fontSize: "11px",
-          color: "#aaa",
-          opacity: selectedDoc ? 0 : 1,
-          transition: "opacity 0.2s ease",
-          pointerEvents: "none",
-        }}
-      >
+      <div className={`${styles.hint} ${selectedDoc ? styles.hintHidden : styles.hintVisible}`}>
         ※ 編集するにはデータを選択して「表示する」を押してください
       </div>
     </>
@@ -117,9 +95,9 @@ export function FieldEditor({
 }: FieldEditorProps) {
   return (
     <>
-      <div style={{ marginBottom: "15px" }}>
-        <label style={{ display: "block", marginBottom: "5px" }}>編集するフィールド</label>
-        <select onChange={(event) => onSelectField(event.target.value)} value={selectedField} disabled={!isDisplayed} style={{ width: "40%" }}>
+      <div className={styles.row}>
+        <label className={styles.label}>編集するフィールド</label>
+        <select onChange={(event) => onSelectField(event.target.value)} value={selectedField} disabled={!isDisplayed} className={styles.fieldSelect}>
           <option value="">フィールドを選択</option>
           {fieldList.map((field) => (
             <option key={field} value={field}>
@@ -129,7 +107,7 @@ export function FieldEditor({
         </select>
       </div>
 
-      <div style={{ marginBottom: "15px" }}>
+      <div className={styles.row}>
         {updateValues.map((value, index) => (
           <input
             key={index}
@@ -138,7 +116,7 @@ export function FieldEditor({
             value={value}
             disabled={!isDisplayed}
             onChange={(event) => onUpdateValue(index, event.target.value)}
-            style={{ marginLeft: "10px", width: "9%" }}
+            className={styles.numberInput}
           />
         ))}
         <label>
@@ -149,7 +127,7 @@ export function FieldEditor({
             checked={operation === "increase"}
             disabled={!isDisplayed}
             onChange={() => onSetOperation("increase")}
-            style={{ marginLeft: "10px" }}
+            className={styles.radioInput}
           />
           増
         </label>
@@ -161,11 +139,11 @@ export function FieldEditor({
             checked={operation === "decrease"}
             disabled={!isDisplayed}
             onChange={() => onSetOperation("decrease")}
-            style={{ marginLeft: "10px" }}
+            className={styles.radioInput}
           />
           減
         </label>
-        <button onClick={onApply} disabled={!isDisplayed} style={{ marginLeft: "10px", width: "12%" }}>
+        <button onClick={onApply} disabled={!isDisplayed} className={styles.applyButton}>
           反映
         </button>
       </div>
@@ -191,54 +169,44 @@ export function ExtraFieldsPanel({
     <>
       <button
         onClick={onToggle}
-        style={{
-          marginBottom: "10px",
-          padding: "4px 8px",
-          fontSize: "12px",
-          lineHeight: "1.2",
-          cursor: "pointer",
-          width: "100%",
-          textAlign: "center",
-          border: "1px solid #ccc",
-          borderRadius: "5px",
-        }}
+        className={styles.toggleButton}
       >
         {isVisible ? "▲ 追加・削除を閉じる" : "▼ 追加・削除を表示"}
       </button>
 
       {isVisible && (
-        <div style={{ marginBottom: "15px", padding: "10px", border: "1px solid #ccc", borderRadius: "5px" }}>
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>追加するフィールド</label>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div className={styles.extraPanel}>
+          <div className={styles.row}>
+            <label className={styles.label}>追加するフィールド</label>
+            <div className={styles.fieldGroup}>
               <input
                 type="text"
                 placeholder="フィールド名"
                 value={newFieldName}
                 onChange={(event) => onSetNewFieldName(event.target.value)}
-                style={{ flex: "1", padding: "8px", border: "1px solid #ccc", borderRadius: "5px" }}
+                className={styles.textInput}
               />
               <input
                 type="number"
                 placeholder="数"
                 value={newFieldValue}
                 onChange={(event) => onSetNewFieldValue(event.target.value)}
-                style={{ width: "80px", padding: "8px", border: "1px solid #ccc", borderRadius: "5px" }}
+                className={styles.smallInput}
               />
-              <button onClick={onAddField} style={{ padding: "8px", cursor: "pointer", borderRadius: "5px", border: "1px solid #ccc" }}>
+              <button onClick={onAddField} className={styles.panelButton}>
                 追加
               </button>
             </div>
           </div>
 
           <div>
-            <label style={{ display: "block", marginBottom: "5px" }}>削除するフィールド</label>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <label className={styles.label}>削除するフィールド</label>
+            <div className={styles.fieldGroup}>
               <select
                 onChange={(event) => onSelectFieldToDelete(event.target.value)}
                 value={selectedFieldToDelete}
                 disabled={!isDisplayed}
-                style={{ flex: "1", padding: "8px", border: "1px solid #ccc", borderRadius: "5px" }}
+                className={styles.textInput}
               >
                 <option value="">削除するフィールドを選択</option>
                 {fieldList.map((field) => (
@@ -250,7 +218,7 @@ export function ExtraFieldsPanel({
               <button
                 onClick={onDeleteField}
                 disabled={!isDisplayed}
-                style={{ padding: "8px", cursor: "pointer", borderRadius: "5px", border: "1px solid #ccc" }}
+                className={styles.panelButton}
               >
                 削除
               </button>
@@ -264,14 +232,14 @@ export function ExtraFieldsPanel({
 
 export function PreviewPanels({ previewText, previewHistory, isMobile }: PreviewPanelsProps) {
   return (
-    <div style={{ display: "flex", gap: "5px", justifyContent: "center", marginBottom: "15px" }}>
-      <div style={{ width: "40%" }}>
-        <label style={{ display: "block", marginBottom: "5px" }}>プレビュー</label>
-        <textarea value={previewText} readOnly rows={isMobile ? 10 : 18} style={{ width: "100%", marginTop: "5px" }} />
+    <div className={styles.previewLayout}>
+      <div className={styles.previewColumn}>
+        <label className={styles.label}>プレビュー</label>
+        <textarea value={previewText} readOnly rows={isMobile ? 10 : 18} className={styles.textarea} />
       </div>
-      <div style={{ width: "56%" }}>
-        <label style={{ display: "block", marginBottom: "5px" }}>履歴</label>
-        <textarea value={previewHistory} readOnly rows={isMobile ? 10 : 18} style={{ width: "100%", marginTop: "5px" }} />
+      <div className={styles.historyColumn}>
+        <label className={styles.label}>履歴</label>
+        <textarea value={previewHistory} readOnly rows={isMobile ? 10 : 18} className={styles.textarea} />
       </div>
     </div>
   );
@@ -280,18 +248,18 @@ export function PreviewPanels({ previewText, previewHistory, isMobile }: Preview
 export function SaveCopyActions({ isDisplayed, isSaved, isCopied, onSaveData, onCopyToClipboard }: SaveCopyActionsProps) {
   return (
     <>
-      <div style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-        <button onClick={onSaveData} disabled={!isDisplayed} style={{ width: "40%" }}>
+      <div className={styles.actionRow}>
+        <button onClick={onSaveData} disabled={!isDisplayed} className={styles.primaryAction}>
           データを保存
         </button>
-        {isSaved && <span style={{ marginLeft: "10px", color: "limegreen" }}>保存しました</span>}
+        {isSaved && <span className={styles.successText}>保存しました</span>}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <button onClick={onCopyToClipboard} disabled={!isSaved} style={{ width: "40%" }}>
+      <div className={styles.copyRow}>
+        <button onClick={onCopyToClipboard} disabled={!isSaved} className={styles.primaryAction}>
           テキストをコピー
         </button>
-        {isCopied && <span style={{ marginLeft: "10px", color: "limegreen" }}>コピー完了</span>}
+        {isCopied && <span className={styles.successText}>コピー完了</span>}
       </div>
     </>
   );
