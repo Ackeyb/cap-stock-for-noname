@@ -8,10 +8,18 @@ import {
   PreviewPanels,
   SaveCopyActions,
 } from "../components/CapStockControls";
+import {
+  INITIAL_UPDATE_VALUES,
+  addFieldValue,
+  appendHistory,
+  applyFieldUpdates,
+  buildSaveData,
+  deleteFieldValue,
+  formatPlainPreview,
+  formatPreview,
+  getOrderedVisibleData,
+} from "../lib/capstockLogic";
 import { fetchCapstockDoc, fetchRecentCapstockDocIds, saveCapstockDoc } from "../lib/capstockService";
-
-const INITIAL_UPDATE_VALUES = ["", "", "", "", ""];
-const MINUS_FIELD_NAME = "マイナス";
 
 export default function Home() {
   const [docList, setDocList] = useState([]);
@@ -44,16 +52,6 @@ export default function Home() {
     fetchDocs();
   }, []);
 
-  const formatPreview = (data, baseData = {}) =>
-    Object.entries(data)
-      .map(([key, value]) => {
-        const baseValue = baseData[key] ?? value;
-        const diff = value - baseValue;
-        const diffText = diff === 0 ? "" : ` (${diff > 0 ? "+" : ""}${diff})`;
-        return `${key}: ${value}${diffText}`;
-      })
-      .join("\n");
-
   const fetchSelectedDoc = async () => {
     if (!selectedDoc) {
       console.error("データが選択されていません");
@@ -72,14 +70,12 @@ export default function Home() {
         return;
       }
 
-      const orderedKeys = data._order || Object.keys(data);
-      const visibleKeys = orderedKeys.filter((key) => key !== "_order");
-      const sortedData = Object.fromEntries(visibleKeys.map((key) => [key, data[key]]));
+      const { fieldList: visibleKeys, values: sortedData } = getOrderedVisibleData(data);
 
       setTempData(sortedData);
       setBaseDataForDiff(sortedData);
       setFieldList(visibleKeys);
-      setPreviewText(visibleKeys.map((key) => `${key}: ${data[key]}`).join("\n"));
+      setPreviewText(formatPlainPreview(sortedData));
       setPreviewHistory("");
       setIsSaved(false);
       setIsDisplayed(true);
@@ -91,35 +87,16 @@ export default function Home() {
   const handleUpdateFieldMultiple = () => {
     if (!selectedField) return;
 
-    const updatedData = { ...tempData };
-    const historyEntries = [];
-
-    updateValues.forEach((value) => {
-      if (value === "") return;
-
-      const oldValue = updatedData[selectedField] || 0;
-      let newValue = operation === "increase" ? oldValue + Number(value) : oldValue - Number(value);
-
-      if (newValue < 0 && selectedField !== MINUS_FIELD_NAME) {
-        const minusChange = newValue;
-        updatedData[MINUS_FIELD_NAME] = (updatedData[MINUS_FIELD_NAME] || 0) + minusChange;
-        newValue = 0;
-        historyEntries.push(
-          `${MINUS_FIELD_NAME}: ${tempData[MINUS_FIELD_NAME] || 0} -> ${updatedData[MINUS_FIELD_NAME]} (${minusChange})`
-        );
-      }
-
-      updatedData[selectedField] = newValue;
-
-      const fieldChange = newValue - oldValue;
-      historyEntries.push(
-        `${selectedField}: ${oldValue} -> ${newValue} (${fieldChange >= 0 ? `+${fieldChange}` : fieldChange})`
-      );
+    const { data: updatedData, historyEntries } = applyFieldUpdates({
+      data: tempData,
+      selectedField,
+      updateValues,
+      operation,
     });
 
     setTempData(updatedData);
     setPreviewText(formatPreview(updatedData, baseDataForDiff));
-    setPreviewHistory((prev) => prev + (prev ? "\n" : "") + historyEntries.join("\n"));
+    setPreviewHistory((prev) => appendHistory(prev, historyEntries));
     setUpdateValues(INITIAL_UPDATE_VALUES);
     setIsSaved(false);
   };
@@ -139,13 +116,12 @@ export default function Home() {
   const handleAddField = () => {
     if (!newFieldName || newFieldValue === "") return;
 
-    const numericValue = Number(newFieldValue);
-    const updatedData = { ...tempData, [newFieldName]: numericValue };
+    const { data: updatedData, historyEntry } = addFieldValue(tempData, newFieldName, newFieldValue);
 
     setTempData(updatedData);
     setFieldList(Object.keys(updatedData));
     setPreviewText(formatPreview(updatedData, baseDataForDiff));
-    setPreviewHistory((prevHistory) => prevHistory + (prevHistory ? "\n" : "") + `追加: ${newFieldName} (${numericValue})`);
+    setPreviewHistory((prevHistory) => appendHistory(prevHistory, historyEntry));
     setNewFieldName("");
     setNewFieldValue("");
     setIsSaved(false);
@@ -154,14 +130,12 @@ export default function Home() {
   const handleDeleteField = () => {
     if (!selectedFieldToDelete) return;
 
-    const oldValue = tempData[selectedFieldToDelete];
-    const updatedData = { ...tempData };
-    delete updatedData[selectedFieldToDelete];
+    const { data: updatedData, historyEntry } = deleteFieldValue(tempData, selectedFieldToDelete);
 
     setTempData(updatedData);
     setFieldList(Object.keys(updatedData));
     setPreviewText(formatPreview(updatedData, baseDataForDiff));
-    setPreviewHistory((prevHistory) => prevHistory + (prevHistory ? "\n" : "") + `削除: ${selectedFieldToDelete} (${oldValue})`);
+    setPreviewHistory((prevHistory) => appendHistory(prevHistory, historyEntry));
     setSelectedFieldToDelete("");
     setIsSaved(false);
   };
@@ -180,10 +154,7 @@ export default function Home() {
       counter++;
     }
 
-    const saveData = { ...tempData };
-    saveData._order = Object.keys(saveData).filter((key) => key !== "_order");
-
-    await saveCapstockDoc(newDocName, saveData);
+    await saveCapstockDoc(newDocName, buildSaveData(tempData));
 
     setIsSaved(true);
     setDocList([newDocName, ...docList].slice(0, 20));
