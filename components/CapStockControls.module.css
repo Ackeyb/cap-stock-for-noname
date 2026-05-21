@@ -156,3 +156,8 @@
   margin-left: 10px;
   color: limegreen;
 }
+
+.errorMessage {
+  margin-bottom: 12px;
+  color: #ff8a8a;
+}

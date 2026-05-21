@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -28,15 +28,3 @@ if (missingFirebaseEnv.length > 0 && typeof window !== "undefined") {
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
-
-export const getCapstockItems = async () => {
-  const docRef = doc(db, "capstock", "items");
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    return docSnap.data();
-  }
-
-  console.log("capstock/items document does not exist");
-  return null;
-};

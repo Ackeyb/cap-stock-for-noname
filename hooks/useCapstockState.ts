@@ -17,6 +17,7 @@ type CapstockState = {
   newFieldValue: string;
   selectedFieldToDelete: string;
   isCopied: boolean;
+  errorMessage: string;
   tempData: CapstockData;
   isExtraFieldsVisible: boolean;
   baseDataForDiff: CapstockData;
@@ -38,7 +39,9 @@ type CapstockAction =
   | { type: "clearFieldToDelete" }
   | { type: "toggleExtraFields" }
   | { type: "saved"; docName: string }
-  | { type: "copied"; isCopied: boolean };
+  | { type: "copied"; isCopied: boolean }
+  | { type: "setError"; errorMessage: string }
+  | { type: "clearError" };
 
 const initialState: CapstockState = {
   docList: [],
@@ -55,6 +58,7 @@ const initialState: CapstockState = {
   newFieldValue: "",
   selectedFieldToDelete: "",
   isCopied: false,
+  errorMessage: "",
   tempData: {},
   isExtraFieldsVisible: false,
   baseDataForDiff: {},
@@ -65,7 +69,7 @@ function reducer(state: CapstockState, action: CapstockAction): CapstockState {
     case "setDocList":
       return { ...state, docList: action.docList };
     case "selectDoc":
-      return { ...state, selectedDoc: action.selectedDoc };
+      return { ...state, selectedDoc: action.selectedDoc, errorMessage: "" };
     case "selectField":
       return { ...state, selectedField: action.selectedField };
     case "setOperation":
@@ -85,6 +89,7 @@ function reducer(state: CapstockState, action: CapstockAction): CapstockState {
         previewHistory: "",
         isSaved: false,
         isDisplayed: true,
+        errorMessage: "",
       };
     case "docMissing":
       return {
@@ -93,6 +98,7 @@ function reducer(state: CapstockState, action: CapstockAction): CapstockState {
         previewText: "データが見つかりません",
         fieldList: [],
         isDisplayed: false,
+        errorMessage: "選択したデータが見つかりませんでした。",
       };
     case "dataEdited":
       return {
@@ -103,6 +109,7 @@ function reducer(state: CapstockState, action: CapstockAction): CapstockState {
         previewHistory: appendHistory(state.previewHistory, action.historyEntries),
         updateValues: action.resetUpdateValues ? INITIAL_UPDATE_VALUES : state.updateValues,
         isSaved: false,
+        errorMessage: "",
       };
     case "setNewFieldName":
       return { ...state, newFieldName: action.newFieldName };
@@ -121,9 +128,14 @@ function reducer(state: CapstockState, action: CapstockAction): CapstockState {
         ...state,
         isSaved: true,
         docList: [action.docName, ...state.docList].slice(0, 20),
+        errorMessage: "",
       };
     case "copied":
       return { ...state, isCopied: action.isCopied };
+    case "setError":
+      return { ...state, errorMessage: action.errorMessage };
+    case "clearError":
+      return { ...state, errorMessage: "" };
     default:
       return state;
   }

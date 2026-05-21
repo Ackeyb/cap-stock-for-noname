@@ -49,6 +49,10 @@ type SaveCopyActionsProps = {
   onCopyToClipboard: () => void;
 };
 
+type ErrorMessageProps = {
+  message: string;
+};
+
 export function PageTitle() {
   return (
     <div className={styles.titleWrap}>
@@ -80,6 +84,12 @@ export function DocSelector({ docList, selectedDoc, onSelectDoc, onFetchSelected
       </div>
     </>
   );
+}
+
+export function ErrorMessage({ message }: ErrorMessageProps) {
+  if (!message) return null;
+
+  return <div className={styles.errorMessage}>{message}</div>;
 }
 
 export function FieldEditor({

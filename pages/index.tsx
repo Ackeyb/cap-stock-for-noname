@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useMediaQuery } from "react-responsive";
 import {
   DocSelector,
+  ErrorMessage,
   ExtraFieldsPanel,
   FieldEditor,
   PageTitle,
@@ -37,6 +38,7 @@ export default function Home() {
     newFieldValue,
     selectedFieldToDelete,
     isCopied,
+    errorMessage,
     tempData,
     isExtraFieldsVisible,
     baseDataForDiff,
@@ -55,7 +57,7 @@ export default function Home() {
 
   const fetchSelectedDoc = async () => {
     if (!selectedDoc) {
-      console.error("データが選択されていません");
+      dispatch({ type: "setError", errorMessage: "データを選択してください。" });
       return;
     }
 
@@ -63,15 +65,14 @@ export default function Home() {
       const data = await fetchCapstockDoc(selectedDoc);
 
       if (!data) {
-        console.warn("データが見つかりません:", selectedDoc);
         dispatch({ type: "docMissing" });
         return;
       }
 
       const { fieldList: visibleKeys, values: sortedData } = getOrderedVisibleData(data);
       dispatch({ type: "docLoaded", data: sortedData, fieldList: visibleKeys });
-    } catch (error) {
-      console.error("データ取得中にエラーが発生しました:", error);
+    } catch {
+      dispatch({ type: "setError", errorMessage: "データ取得中にエラーが発生しました。" });
     }
   };
 
@@ -100,10 +101,15 @@ export default function Home() {
     const footerText = "\n\n管理ツールはこちら https://cap-stock-for-noname.vercel.app/";
     const textToCopy = previewText + footerText;
 
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      dispatch({ type: "copied", isCopied: true });
-      setTimeout(() => dispatch({ type: "copied", isCopied: false }), 2000);
-    });
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        dispatch({ type: "copied", isCopied: true });
+        setTimeout(() => dispatch({ type: "copied", isCopied: false }), 2000);
+      })
+      .catch(() => {
+        dispatch({ type: "setError", errorMessage: "クリップボードへのコピーに失敗しました。" });
+      });
   };
 
   const handleAddField = () => {
@@ -148,9 +154,12 @@ export default function Home() {
       counter++;
     }
 
-    await saveCapstockDoc(newDocName, buildSaveData(tempData));
-
-    dispatch({ type: "saved", docName: newDocName });
+    try {
+      await saveCapstockDoc(newDocName, buildSaveData(tempData));
+      dispatch({ type: "saved", docName: newDocName });
+    } catch {
+      dispatch({ type: "setError", errorMessage: "データ保存中にエラーが発生しました。" });
+    }
   };
 
   return (
@@ -162,6 +171,7 @@ export default function Home() {
         onSelectDoc={(docName) => dispatch({ type: "selectDoc", selectedDoc: docName })}
         onFetchSelectedDoc={fetchSelectedDoc}
       />
+      <ErrorMessage message={errorMessage} />
       <FieldEditor
         fieldList={fieldList}
         selectedField={selectedField}
