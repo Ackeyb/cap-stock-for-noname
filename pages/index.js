@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useMediaQuery } from "react-responsive";
 import {
   DocSelector,
@@ -9,48 +9,49 @@ import {
   SaveCopyActions,
 } from "../components/CapStockControls";
 import {
-  INITIAL_UPDATE_VALUES,
   addFieldValue,
-  appendHistory,
   applyFieldUpdates,
   buildSaveData,
   deleteFieldValue,
-  formatPlainPreview,
   formatPreview,
   getOrderedVisibleData,
 } from "../lib/capstockLogic";
 import { fetchCapstockDoc, fetchRecentCapstockDocIds, saveCapstockDoc } from "../lib/capstockService";
+import { useCapstockState } from "../hooks/useCapstockState";
 
 export default function Home() {
-  const [docList, setDocList] = useState([]);
-  const [selectedDoc, setSelectedDoc] = useState("");
-  const [previewText, setPreviewText] = useState("");
-  const [previewHistory, setPreviewHistory] = useState("");
-  const [fieldList, setFieldList] = useState([]);
-  const [selectedField, setSelectedField] = useState("");
-  const [updateValues, setUpdateValues] = useState(INITIAL_UPDATE_VALUES);
-  const [operation, setOperation] = useState("increase");
-  const [isSaved, setIsSaved] = useState(false);
-  const [isDisplayed, setIsDisplayed] = useState(false);
-  const [newFieldName, setNewFieldName] = useState("");
-  const [newFieldValue, setNewFieldValue] = useState("");
-  const [selectedFieldToDelete, setSelectedFieldToDelete] = useState("");
-  const [isCopied, setIsCopied] = useState(false);
   const isMobile = useMediaQuery({ maxWidth: 768 });
-  const [tempData, setTempData] = useState({});
-  const [isExtraFieldsVisible, setIsExtraFieldsVisible] = useState(false);
-  const [baseDataForDiff, setBaseDataForDiff] = useState({});
+  const { state, dispatch } = useCapstockState();
+  const {
+    docList,
+    selectedDoc,
+    previewText,
+    previewHistory,
+    fieldList,
+    selectedField,
+    updateValues,
+    operation,
+    isSaved,
+    isDisplayed,
+    newFieldName,
+    newFieldValue,
+    selectedFieldToDelete,
+    isCopied,
+    tempData,
+    isExtraFieldsVisible,
+    baseDataForDiff,
+  } = state;
 
   useEffect(() => {
     document.body.style.backgroundColor = "#121212";
     document.body.style.color = "#ffffff";
 
     const fetchDocs = async () => {
-      setDocList(await fetchRecentCapstockDocIds());
+      dispatch({ type: "setDocList", docList: await fetchRecentCapstockDocIds() });
     };
 
     fetchDocs();
-  }, []);
+  }, [dispatch]);
 
   const fetchSelectedDoc = async () => {
     if (!selectedDoc) {
@@ -63,22 +64,12 @@ export default function Home() {
 
       if (!data) {
         console.warn("データが見つかりません:", selectedDoc);
-        setTempData({});
-        setPreviewText("データが見つかりません");
-        setFieldList([]);
-        setIsDisplayed(false);
+        dispatch({ type: "docMissing" });
         return;
       }
 
       const { fieldList: visibleKeys, values: sortedData } = getOrderedVisibleData(data);
-
-      setTempData(sortedData);
-      setBaseDataForDiff(sortedData);
-      setFieldList(visibleKeys);
-      setPreviewText(formatPlainPreview(sortedData));
-      setPreviewHistory("");
-      setIsSaved(false);
-      setIsDisplayed(true);
+      dispatch({ type: "docLoaded", data: sortedData, fieldList: visibleKeys });
     } catch (error) {
       console.error("データ取得中にエラーが発生しました:", error);
     }
@@ -94,11 +85,13 @@ export default function Home() {
       operation,
     });
 
-    setTempData(updatedData);
-    setPreviewText(formatPreview(updatedData, baseDataForDiff));
-    setPreviewHistory((prev) => appendHistory(prev, historyEntries));
-    setUpdateValues(INITIAL_UPDATE_VALUES);
-    setIsSaved(false);
+    dispatch({
+      type: "dataEdited",
+      data: updatedData,
+      previewText: formatPreview(updatedData, baseDataForDiff),
+      historyEntries,
+      resetUpdateValues: true,
+    });
   };
 
   const handleCopyToClipboard = () => {
@@ -108,8 +101,8 @@ export default function Home() {
     const textToCopy = previewText + footerText;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      dispatch({ type: "copied", isCopied: true });
+      setTimeout(() => dispatch({ type: "copied", isCopied: false }), 2000);
     });
   };
 
@@ -118,13 +111,13 @@ export default function Home() {
 
     const { data: updatedData, historyEntry } = addFieldValue(tempData, newFieldName, newFieldValue);
 
-    setTempData(updatedData);
-    setFieldList(Object.keys(updatedData));
-    setPreviewText(formatPreview(updatedData, baseDataForDiff));
-    setPreviewHistory((prevHistory) => appendHistory(prevHistory, historyEntry));
-    setNewFieldName("");
-    setNewFieldValue("");
-    setIsSaved(false);
+    dispatch({
+      type: "dataEdited",
+      data: updatedData,
+      previewText: formatPreview(updatedData, baseDataForDiff),
+      historyEntries: historyEntry,
+    });
+    dispatch({ type: "clearNewField" });
   };
 
   const handleDeleteField = () => {
@@ -132,12 +125,13 @@ export default function Home() {
 
     const { data: updatedData, historyEntry } = deleteFieldValue(tempData, selectedFieldToDelete);
 
-    setTempData(updatedData);
-    setFieldList(Object.keys(updatedData));
-    setPreviewText(formatPreview(updatedData, baseDataForDiff));
-    setPreviewHistory((prevHistory) => appendHistory(prevHistory, historyEntry));
-    setSelectedFieldToDelete("");
-    setIsSaved(false);
+    dispatch({
+      type: "dataEdited",
+      data: updatedData,
+      previewText: formatPreview(updatedData, baseDataForDiff),
+      historyEntries: historyEntry,
+    });
+    dispatch({ type: "clearFieldToDelete" });
   };
 
   const handleSaveData = async () => {
@@ -156,27 +150,29 @@ export default function Home() {
 
     await saveCapstockDoc(newDocName, buildSaveData(tempData));
 
-    setIsSaved(true);
-    setDocList([newDocName, ...docList].slice(0, 20));
+    dispatch({ type: "saved", docName: newDocName });
   };
 
   return (
     <div>
       <PageTitle />
-      <DocSelector docList={docList} selectedDoc={selectedDoc} onSelectDoc={setSelectedDoc} onFetchSelectedDoc={fetchSelectedDoc} />
+      <DocSelector
+        docList={docList}
+        selectedDoc={selectedDoc}
+        onSelectDoc={(docName) => dispatch({ type: "selectDoc", selectedDoc: docName })}
+        onFetchSelectedDoc={fetchSelectedDoc}
+      />
       <FieldEditor
         fieldList={fieldList}
         selectedField={selectedField}
         updateValues={updateValues}
         operation={operation}
         isDisplayed={isDisplayed}
-        onSelectField={setSelectedField}
+        onSelectField={(fieldName) => dispatch({ type: "selectField", selectedField: fieldName })}
         onUpdateValue={(index, value) => {
-          const newValues = [...updateValues];
-          newValues[index] = value;
-          setUpdateValues(newValues);
+          dispatch({ type: "setUpdateValue", index, value });
         }}
-        onSetOperation={setOperation}
+        onSetOperation={(nextOperation) => dispatch({ type: "setOperation", operation: nextOperation })}
         onApply={handleUpdateFieldMultiple}
       />
       <ExtraFieldsPanel
@@ -186,10 +182,10 @@ export default function Home() {
         newFieldName={newFieldName}
         newFieldValue={newFieldValue}
         selectedFieldToDelete={selectedFieldToDelete}
-        onToggle={() => setIsExtraFieldsVisible(!isExtraFieldsVisible)}
-        onSetNewFieldName={setNewFieldName}
-        onSetNewFieldValue={setNewFieldValue}
-        onSelectFieldToDelete={setSelectedFieldToDelete}
+        onToggle={() => dispatch({ type: "toggleExtraFields" })}
+        onSetNewFieldName={(fieldName) => dispatch({ type: "setNewFieldName", newFieldName: fieldName })}
+        onSetNewFieldValue={(fieldValue) => dispatch({ type: "setNewFieldValue", newFieldValue: fieldValue })}
+        onSelectFieldToDelete={(fieldName) => dispatch({ type: "selectFieldToDelete", selectedFieldToDelete: fieldName })}
         onAddField={handleAddField}
         onDeleteField={handleDeleteField}
       />
