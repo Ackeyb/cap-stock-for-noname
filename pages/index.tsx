@@ -8,6 +8,7 @@ import {
   PageTitle,
   PreviewPanels,
   SaveCopyActions,
+  appShellClassName,
 } from "../components/CapStockControls";
 import {
   addFieldValue,
@@ -47,8 +48,8 @@ export default function Home() {
   } = state;
 
   useEffect(() => {
-    document.body.style.backgroundColor = "#121212";
-    document.body.style.color = "#ffffff";
+    document.body.style.backgroundColor = "#080808";
+    document.body.style.color = "#f5f0e8";
 
     const fetchDocs = async () => {
       try {
@@ -169,7 +170,7 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <main className={appShellClassName}>
       <PageTitle />
       <DocSelector
         docList={docList}
@@ -211,6 +212,6 @@ export default function Home() {
         onSaveData={handleSaveData}
         onCopyToClipboard={handleCopyToClipboard}
       />
-    </div>
+    </main>
   );
 }

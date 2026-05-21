@@ -1,56 +1,157 @@
+.appShell {
+  width: min(100%, 760px);
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: 14px 12px 24px;
+  color: #f5f0e8;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
+    #080808;
+}
+
 .titleWrap {
   display: flex;
   justify-content: center;
-  width: 100%;
+  min-width: 0;
 }
 
 .title {
-  color: red;
-  border-bottom: 2px solid red;
-  padding-bottom: 5px;
-  font-size: 1.5rem;
-  white-space: nowrap;
+  margin: 2px 0 14px;
+  color: #f5f0e8;
+  border-bottom: 1px solid #b79962;
+  padding-bottom: 7px;
+  font-size: 1.18rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.15;
   text-align: center;
-  margin: 20px 0 15px;
+  white-space: nowrap;
 }
 
-.row {
-  margin-bottom: 15px;
-}
-
-.compactRow {
-  margin-bottom: 5px;
+.section {
+  margin-bottom: 12px;
+  min-width: 0;
 }
 
 .label {
   display: block;
   margin-bottom: 5px;
+  color: #b8afa1;
+  font-size: 0.74rem;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.docSelect {
-  width: 60%;
+.docRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3.75rem;
+  gap: 6px;
+  align-items: center;
 }
 
-.fieldSelect {
-  width: 40%;
+.updateRow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) 2.05rem 2.05rem 3rem;
+  gap: 4px;
+  align-items: center;
+  margin-top: 8px;
 }
 
-.inlineButton {
-  margin-left: 10px;
-  width: 20%;
+.addRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3.7rem 3.55rem;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.applyButton {
-  margin-left: 10px;
-  width: 12%;
+.deleteRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3.55rem;
+  gap: 6px;
+  align-items: center;
+}
+
+.control,
+.button,
+.toggleButton {
+  min-width: 0;
+  height: 34px;
+  border: 1px solid #2e2a24;
+  border-radius: 6px;
+  background: #111;
+  color: #f5f0e8;
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.control {
+  width: 100%;
+  padding: 0 9px;
+  outline: none;
+}
+
+.control:focus {
+  border-color: #b79962;
+  box-shadow: 0 0 0 1px rgba(183, 153, 98, 0.28);
+}
+
+.button,
+.toggleButton {
+  padding: 0 8px;
+  color: #f7ead3;
+  background: #17130e;
+  border-color: #6d5630;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.button:disabled,
+.control:disabled {
+  color: #6e675e;
+  background: #0d0d0d;
+  border-color: #201e1b;
+  cursor: not-allowed;
+}
+
+.radioButton {
+  display: grid;
+  place-items: center;
+  height: 34px;
+  min-width: 0;
+  border: 1px solid #2e2a24;
+  border-radius: 6px;
+  background: #111;
+  color: #d9d0c2;
+  font-size: 0.78rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.radioButton input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radioButton:has(input:checked) {
+  color: #0a0a0a;
+  background: #c6a667;
+  border-color: #d5bb83;
 }
 
 .hint {
-  height: 16px;
-  margin-bottom: 8px;
-  font-size: 11px;
-  color: #aaa;
+  height: 15px;
+  margin-top: 5px;
+  color: #8f877d;
+  font-size: 0.68rem;
+  line-height: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: opacity 0.2s ease;
+  white-space: nowrap;
   pointer-events: none;
 }
 
@@ -62,102 +163,122 @@
   opacity: 1;
 }
 
-.numberInput {
-  margin-left: 10px;
-  width: 9%;
-}
-
-.radioInput {
-  margin-left: 10px;
-}
-
 .toggleButton {
-  margin-bottom: 10px;
-  padding: 4px 8px;
-  font-size: 12px;
-  line-height: 1.2;
-  cursor: pointer;
   width: 100%;
-  text-align: center;
-  border: 1px solid #ccc;
-  border-radius: 5px;
 }
 
 .extraPanel {
-  margin-bottom: 15px;
+  margin-top: 8px;
   padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.fieldGroup {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.textInput {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.smallInput {
-  width: 80px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.panelButton {
-  padding: 8px;
-  cursor: pointer;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid #201d19;
+  border-radius: 8px;
+  background: #0d0c0a;
 }
 
 .previewLayout {
-  display: flex;
-  gap: 5px;
-  justify-content: center;
-  margin-bottom: 15px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.38fr);
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.previewColumn {
-  width: 40%;
-}
-
+.previewColumn,
 .historyColumn {
-  width: 56%;
+  min-width: 0;
 }
 
 .textarea {
   width: 100%;
-  margin-top: 5px;
+  min-width: 0;
+  margin-top: 0;
+  padding: 9px;
+  resize: vertical;
+  border: 1px solid #2e2a24;
+  border-radius: 8px;
+  background: #10100f;
+  color: #f5f0e8;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  outline: none;
 }
 
 .actionRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: 4.35rem minmax(0, 1fr);
+  gap: 8px;
   align-items: center;
-  margin-bottom: 15px;
-}
-
-.copyRow {
-  display: flex;
-  align-items: center;
-}
-
-.primaryAction {
-  width: 40%;
+  margin-bottom: 8px;
 }
 
 .successText {
-  margin-left: 10px;
-  color: limegreen;
+  min-width: 0;
+  color: #9dd39b;
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .errorMessage {
-  margin-bottom: 12px;
-  color: #ff8a8a;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 1px solid #62302f;
+  border-radius: 8px;
+  color: #ffb1ac;
+  background: #1a0e0d;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+@media (max-width: 430px) {
+  .appShell {
+    padding: 10px 8px 18px;
+  }
+
+  .title {
+    font-size: 1.02rem;
+  }
+
+  .control,
+  .button,
+  .toggleButton,
+  .radioButton {
+    height: 32px;
+    border-radius: 5px;
+    font-size: 0.73rem;
+  }
+
+  .control {
+    padding: 0 6px;
+  }
+
+  .docRow {
+    grid-template-columns: minmax(0, 1fr) 3.25rem;
+    gap: 4px;
+  }
+
+  .updateRow {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) 1.8rem 1.8rem 2.6rem;
+    gap: 3px;
+  }
+
+  .addRow {
+    grid-template-columns: minmax(0, 1fr) 3.25rem 3.05rem;
+    gap: 4px;
+  }
+
+  .deleteRow {
+    grid-template-columns: minmax(0, 1fr) 3.05rem;
+    gap: 4px;
+  }
+
+  .previewLayout {
+    gap: 6px;
+  }
+
+  .textarea {
+    padding: 7px;
+    font-size: 0.72rem;
+  }
 }
