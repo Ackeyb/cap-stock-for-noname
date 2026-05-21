@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import {
+  DocSelector,
+  ExtraFieldsPanel,
+  FieldEditor,
+  PageTitle,
+  PreviewPanels,
+  SaveCopyActions,
+} from "../components/CapStockControls";
 import { db } from "../lib/firebase";
 
 const INITIAL_UPDATE_VALUES = ["", "", "", "", ""];
@@ -197,208 +205,45 @@ export default function Home() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-        <h1
-          style={{
-            color: "red",
-            borderBottom: "2px solid red",
-            paddingBottom: "5px",
-            fontSize: "1.5rem",
-            whiteSpace: "nowrap",
-            textAlign: "center",
-            marginBottom: "15px",
-            marginTop: "20px",
-          }}
-        >
-          Cap Management for HANA
-        </h1>
-      </div>
-
-      <div style={{ marginBottom: "5px" }}>
-        <label style={{ display: "block", marginBottom: "5px" }}>データを選択</label>
-        <select onChange={(event) => setSelectedDoc(event.target.value)} value={selectedDoc} style={{ width: "60%" }}>
-          <option value="">-- データを選択してください --</option>
-          {docList.map((docName) => (
-            <option key={docName} value={docName}>
-              {docName}
-            </option>
-          ))}
-        </select>
-        <button onClick={fetchSelectedDoc} disabled={!selectedDoc} style={{ marginLeft: "10px", width: "20%" }}>
-          表示する
-        </button>
-      </div>
-
-      <div
-        style={{
-          height: "16px",
-          marginBottom: "8px",
-          fontSize: "11px",
-          color: "#aaa",
-          opacity: isDisplayed ? 0 : 1,
-          transition: "opacity 0.2s ease",
-          pointerEvents: "none",
+      <PageTitle />
+      <DocSelector docList={docList} selectedDoc={selectedDoc} onSelectDoc={setSelectedDoc} onFetchSelectedDoc={fetchSelectedDoc} />
+      <FieldEditor
+        fieldList={fieldList}
+        selectedField={selectedField}
+        updateValues={updateValues}
+        operation={operation}
+        isDisplayed={isDisplayed}
+        onSelectField={setSelectedField}
+        onUpdateValue={(index, value) => {
+          const newValues = [...updateValues];
+          newValues[index] = value;
+          setUpdateValues(newValues);
         }}
-      >
-        ※ 編集するにはデータを選択して「表示する」を押してください
-      </div>
-
-      <div style={{ marginBottom: "15px" }}>
-        <label style={{ display: "block", marginBottom: "5px" }}>編集するフィールド</label>
-        <select
-          onChange={(event) => setSelectedField(event.target.value)}
-          value={selectedField}
-          disabled={!isDisplayed}
-          style={{ width: "40%" }}
-        >
-          <option value="">フィールドを選択</option>
-          {fieldList.map((field) => (
-            <option key={field} value={field}>
-              {field}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div style={{ marginBottom: "15px" }}>
-        {[0, 1, 2, 3, 4].map((i) => (
-          <input
-            key={i}
-            type="number"
-            placeholder="数"
-            value={updateValues[i]}
-            disabled={!isDisplayed}
-            onChange={(event) => {
-              const newValues = [...updateValues];
-              newValues[i] = event.target.value;
-              setUpdateValues(newValues);
-            }}
-            style={{ marginLeft: "10px", width: "9%" }}
-          />
-        ))}
-        <label>
-          <input
-            type="radio"
-            name="operation"
-            value="increase"
-            checked={operation === "increase"}
-            disabled={!isDisplayed}
-            onChange={() => setOperation("increase")}
-            style={{ marginLeft: "10px" }}
-          />
-          増
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="operation"
-            value="decrease"
-            checked={operation === "decrease"}
-            disabled={!isDisplayed}
-            onChange={() => setOperation("decrease")}
-            style={{ marginLeft: "10px" }}
-          />
-          減
-        </label>
-        <button onClick={handleUpdateFieldMultiple} disabled={!isDisplayed} style={{ marginLeft: "10px", width: "12%" }}>
-          反映
-        </button>
-      </div>
-
-      <button
-        onClick={() => setIsExtraFieldsVisible(!isExtraFieldsVisible)}
-        style={{
-          marginBottom: "10px",
-          padding: "4px 8px",
-          fontSize: "12px",
-          lineHeight: "1.2",
-          cursor: "pointer",
-          width: "100%",
-          textAlign: "center",
-          border: "1px solid #ccc",
-          borderRadius: "5px",
-        }}
-      >
-        {isExtraFieldsVisible ? "▲ 追加・削除を閉じる" : "▼ 追加・削除を表示"}
-      </button>
-
-      {isExtraFieldsVisible && (
-        <div style={{ marginBottom: "15px", padding: "10px", border: "1px solid #ccc", borderRadius: "5px" }}>
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>追加するフィールド</label>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <input
-                type="text"
-                placeholder="フィールド名"
-                value={newFieldName}
-                onChange={(event) => setNewFieldName(event.target.value)}
-                style={{ flex: "1", padding: "8px", border: "1px solid #ccc", borderRadius: "5px" }}
-              />
-              <input
-                type="number"
-                placeholder="数"
-                value={newFieldValue}
-                onChange={(event) => setNewFieldValue(event.target.value)}
-                style={{ width: "80px", padding: "8px", border: "1px solid #ccc", borderRadius: "5px" }}
-              />
-              <button onClick={handleAddField} style={{ padding: "8px", cursor: "pointer", borderRadius: "5px", border: "1px solid #ccc" }}>
-                追加
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label style={{ display: "block", marginBottom: "5px" }}>削除するフィールド</label>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <select
-                onChange={(event) => setSelectedFieldToDelete(event.target.value)}
-                value={selectedFieldToDelete}
-                disabled={!isDisplayed}
-                style={{ flex: "1", padding: "8px", border: "1px solid #ccc", borderRadius: "5px" }}
-              >
-                <option value="">削除するフィールドを選択</option>
-                {fieldList.map((field) => (
-                  <option key={field} value={field}>
-                    {field}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={handleDeleteField}
-                disabled={!isDisplayed}
-                style={{ padding: "8px", cursor: "pointer", borderRadius: "5px", border: "1px solid #ccc" }}
-              >
-                削除
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: "flex", gap: "5px", justifyContent: "center", marginBottom: "15px" }}>
-        <div style={{ width: "40%" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>プレビュー</label>
-          <textarea value={previewText} readOnly rows={isMobile ? 10 : 18} style={{ width: "100%", marginTop: "5px" }} />
-        </div>
-        <div style={{ width: "56%" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>履歴</label>
-          <textarea value={previewHistory} readOnly rows={isMobile ? 10 : 18} style={{ width: "100%", marginTop: "5px" }} />
-        </div>
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-        <button onClick={handleSaveData} disabled={!isDisplayed} style={{ width: "40%" }}>
-          データを保存
-        </button>
-        {isSaved && <span style={{ marginLeft: "10px", color: "limegreen" }}>保存しました</span>}
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <button onClick={handleCopyToClipboard} disabled={!isSaved} style={{ width: "40%" }}>
-          テキストをコピー
-        </button>
-        {isCopied && <span style={{ marginLeft: "10px", color: "limegreen" }}>コピー完了</span>}
-      </div>
+        onSetOperation={setOperation}
+        onApply={handleUpdateFieldMultiple}
+      />
+      <ExtraFieldsPanel
+        fieldList={fieldList}
+        isDisplayed={isDisplayed}
+        isVisible={isExtraFieldsVisible}
+        newFieldName={newFieldName}
+        newFieldValue={newFieldValue}
+        selectedFieldToDelete={selectedFieldToDelete}
+        onToggle={() => setIsExtraFieldsVisible(!isExtraFieldsVisible)}
+        onSetNewFieldName={setNewFieldName}
+        onSetNewFieldValue={setNewFieldValue}
+        onSelectFieldToDelete={setSelectedFieldToDelete}
+        onAddField={handleAddField}
+        onDeleteField={handleDeleteField}
+      />
+      <PreviewPanels previewText={previewText} previewHistory={previewHistory} isMobile={isMobile} />
+      <SaveCopyActions
+        isDisplayed={isDisplayed}
+        isSaved={isSaved}
+        isCopied={isCopied}
+        onSaveData={handleSaveData}
+        onCopyToClipboard={handleCopyToClipboard}
+      />
     </div>
   );
 }
