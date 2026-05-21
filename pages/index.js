@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import {
   DocSelector,
   ExtraFieldsPanel,
@@ -9,7 +8,7 @@ import {
   PreviewPanels,
   SaveCopyActions,
 } from "../components/CapStockControls";
-import { db } from "../lib/firebase";
+import { fetchCapstockDoc, fetchRecentCapstockDocIds, saveCapstockDoc } from "../lib/capstockService";
 
 const INITIAL_UPDATE_VALUES = ["", "", "", "", ""];
 const MINUS_FIELD_NAME = "マイナス";
@@ -39,17 +38,7 @@ export default function Home() {
     document.body.style.color = "#ffffff";
 
     const fetchDocs = async () => {
-      const querySnapshot = await getDocs(collection(db, "capstock"));
-      let docs = querySnapshot.docs.map((snapshot) => snapshot.id).sort().reverse();
-
-      if (docs.length > 20) {
-        for (let i = 20; i < docs.length; i++) {
-          await deleteDoc(doc(db, "capstock", docs[i]));
-        }
-        docs = docs.slice(0, 20);
-      }
-
-      setDocList(docs);
+      setDocList(await fetchRecentCapstockDocIds());
     };
 
     fetchDocs();
@@ -72,10 +61,9 @@ export default function Home() {
     }
 
     try {
-      const docRef = doc(db, "capstock", selectedDoc);
-      const docSnap = await getDoc(docRef);
+      const data = await fetchCapstockDoc(selectedDoc);
 
-      if (!docSnap.exists()) {
+      if (!data) {
         console.warn("データが見つかりません:", selectedDoc);
         setTempData({});
         setPreviewText("データが見つかりません");
@@ -84,7 +72,6 @@ export default function Home() {
         return;
       }
 
-      const data = docSnap.data();
       const orderedKeys = data._order || Object.keys(data);
       const visibleKeys = orderedKeys.filter((key) => key !== "_order");
       const sortedData = Object.fromEntries(visibleKeys.map((key) => [key, data[key]]));
@@ -196,8 +183,7 @@ export default function Home() {
     const saveData = { ...tempData };
     saveData._order = Object.keys(saveData).filter((key) => key !== "_order");
 
-    const newDocRef = doc(db, "capstock", newDocName);
-    await setDoc(newDocRef, saveData);
+    await saveCapstockDoc(newDocName, saveData);
 
     setIsSaved(true);
     setDocList([newDocName, ...docList].slice(0, 20));
