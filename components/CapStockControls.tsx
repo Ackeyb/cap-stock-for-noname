@@ -107,9 +107,9 @@ export function FieldEditor({
 }: FieldEditorProps) {
   return (
     <section className={styles.section}>
-      <label className={styles.label}>編集フィールド</label>
+      <label className={styles.label}>編集する酒クズ</label>
       <select onChange={(event) => onSelectField(event.target.value)} value={selectedField} disabled={!isDisplayed} className={styles.control}>
-        <option value="">フィールドを選択</option>
+        <option value="">酒クズを選択してください</option>
         {fieldList.map((field) => (
           <option key={field} value={field}>
             {field}
@@ -164,24 +164,24 @@ export function ExtraFieldsPanel({
   return (
     <section className={styles.section}>
       <button onClick={onToggle} className={styles.toggleButton}>
-        {isVisible ? "追加・削除を閉じる" : "追加・削除を表示"}
+        {isVisible ? "追加・追放を閉じる" : "追加・追放を表示"}
       </button>
 
       {isVisible && (
         <div className={styles.extraPanel}>
           <label className={styles.label}>追加</label>
           <div className={styles.addRow}>
-            <input type="text" placeholder="フィールド名" value={newFieldName} onChange={(event) => onSetNewFieldName(event.target.value)} className={styles.control} />
+            <input type="text" placeholder="酒クズ名" value={newFieldName} onChange={(event) => onSetNewFieldName(event.target.value)} className={styles.control} />
             <input type="number" inputMode="numeric" placeholder="数" value={newFieldValue} onChange={(event) => onSetNewFieldValue(event.target.value)} className={styles.control} />
             <button onClick={onAddField} className={styles.button}>
               追加
             </button>
           </div>
 
-          <label className={styles.label}>削除</label>
+          <label className={styles.label}>追放</label>
           <div className={styles.deleteRow}>
             <select onChange={(event) => onSelectFieldToDelete(event.target.value)} value={selectedFieldToDelete} disabled={!isDisplayed} className={styles.control}>
-              <option value="">削除するフィールド</option>
+              <option value="">追放する酒クズ</option>
               {fieldList.map((field) => (
                 <option key={field} value={field}>
                   {field}
